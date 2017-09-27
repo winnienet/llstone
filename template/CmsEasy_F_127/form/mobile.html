@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <tal:block condition="php:Helper::drive('Partner')->hiall(room['partner_id'])">
+	<title>云课堂-直播(移动版)</title>
+    </tal:block>
+    <tal:block condition="php:!Helper::drive('Partner')->hiall(room['partner_id'])">
+	<title>欢拓云课堂-直播(移动版)</title>
+    </tal:block>
+    <meta charset="utf-8" />
+	<meta content="initial-scale=1,maximum-scale=1,user-scalable=no,width=device-width" name="viewport" />
+    <!-- <tal:block condition="php:isset(_GET['testcss'])">
+	<link rel="stylesheet" type="text/css" href="css/mobile/index/main.test.css" />
+    </tal:block>
+    <tal:block condition="php:!isset(_GET['testcss'])">
+	<link rel="stylesheet" type="text/css" href="css/mobile/index/main.css" />
+    </tal:block> -->
+    <link rel="stylesheet" type="text/css" href="css/mobile/index/main.css" />
+    <script type="text/javascript">
+        // 通过麦拓API接口,获得一个access_token
+        var access_token = "${access_token}";
+        // 自定义表情包
+        var basePath = 'http://static-1.talk-fun.com/open/cooperation/shangde/live-pc/css/img/emotions/',
+            BASE_EMOTIONS_PACKAGE = {
+                '[fd]': basePath+'/emotion.fd.gif',
+                '[gz]': basePath+'/emotion.gz.gif',
+                '[hx]': basePath+'/emotion.hx.gif',
+                '[jy]': basePath+'/emotion.jy.gif',
+                '[kl]': basePath+'/emotion.kl.gif',
+                '[lg]': basePath+'/emotion.laugh.gif',
+                '[qu]': basePath+'/emotion.question.gif',
+                '[tx]': basePath+'/emotion.tx.gif',
+                '[ag]': basePath+'/feedback.agreed.png',
+                '[fl]': basePath+'/rose.up.png'
+            };
+        var sdkmode = "${sdkmode}";
+        var partner_id = "${room/partner_id}";
+    </script>
+</head>
+<body class="sdkmode_${sdkmode}">
+      
+    <!-- 登录异常提示 begin -->
+    <div class="dialog_box_info">
+         <span class="dialog_box_text">声音视频卡顿或笔画不同步请尝试【刷新】</span>
+         <i></i>
+    </div>      
+    <!-- 登录异常提示 end -->
+
+    <!-- css3 loader -->
+    <div id="loader" class="loader">
+        <div class="spinner">
+          <div class="rect1"></div>
+          <div class="rect2"></div>
+          <div class="rect3"></div>
+          <div class="rect4"></div>
+          <div class="rect5"></div>
+        </div>
+    </div>
+    <!-- 架构 #room-->
+ 	<section class="section_room" id="room">
+        <!-- 直播信息 -->
+        <h1 id="live_info" class="mod_live_info"></h1>
+        <!-- 滚动消息 -->
+        <article id="mod_scroll_info" class="scroll_info">
+            <div class="main_scoller">
+                <marquee class="sc_info">滚动信息怎么处理呢...</marquee>
+                <span class="btn_close">CLOSE</span>
+            </div>
+        </article>
+        <!-- 核心播放器模块 -->
+ 		<section class="section_main">
+            <div class="per_load_con">
+                <img class="prefix" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyRpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoTWFjaW50b3NoKSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpBQzdDRTA4QTU1RjExMUU1OTcxOEVBNEVEMzgzMDlCQSIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDpBQzdDRTA4QjU1RjExMUU1OTcxOEVBNEVEMzgzMDlCQSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkFDN0NFMDg4NTVGMTExRTU5NzE4RUE0RUQzODMwOUJBIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOkFDN0NFMDg5NTVGMTExRTU5NzE4RUE0RUQzODMwOUJBIi8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+UdpNSgAAABdJREFUeNpi/P//PwMyYGJAAxgCAAEGAJM5AwMMWSorAAAAAElFTkSuQmCC"/>
+            </div>
+            
+            <!-- Base -->
+            <nav id="player_operation" class="mod_player_operation">
+                <span id="show_info" class="op_info">信息</span>
+                <span id="full_screen" class="op_fulls">全屏</span>
+                <span id="camera" class="op_camera">摄像头</span>
+                <span id="network_icon" class="network">网络选择</span>
+            </nav>
+
+            <div id="mod_room_preview" class="mod_live_preview">
+                <div class="state">
+                    <span class=""></span>
+                    <p>页面正在努力加载...</p>
+                </div>
+            </div>
+            
+            <!-- 主播放器区域 -->
+            <div id="mod_player_wrap" class="mod_main_player_wrap">
+ 			    <div id="mod_main_player"></div>
+            </div>
+ 		</section>
+
+        <!-- 摄像头包裹 -->
+        <div id="ht_camera_container" class="hide"></div>
+
+        <tal:block condition="php:!isset(_GET['sdkmode']) || _GET['sdkmode'] != 2">
+        <!--  主模块 #modules-->
+ 		<section id="modules" class="mod_modules">
+            <!-- 菜单 #menu-->
+ 			<nav id="nav" class="main_nav">
+                <div class="nav_items">
+                    <span class="cur">聊天<i class="new"></i></span>
+     				<span class="">提问<i class="new"></i></span>
+     				<span id="hor_hidden">公告<i class="new"></i></span> 
+                    <!--刷新按钮-->
+                </div>
+ 			</nav>
+            <!-- 聊天 #chat-->
+ 			<div id="chat" class="mod_chat_con mod_xcon">
+                <!-- chat_hall -->
+                <div class="mod_chat_hall">
+                    <div id="chat_hall" class="chat_inner">
+                        <tal:block replace="">
+                        <!-- #公告 -->
+                        <article class="mod_public_notify">
+                            <div class="cmd_notice">公告：<p>大家是否有看到信息</p></div>
+                        </article>
+                        <!-- #聊天 -->
+                        <div class="pub_msg"><span>上帝冉冉：<i>老 师</i></span><p>真心不错不错 讲得很好！！！非常好哟</p></div>
+                        <div class="pub_msg"><span>上帝冉冉：<i>助 教</i></span><p>真心不错不错 讲得很好上的福克斯风景开发生的看法就是离开对方就是离开多久富士康的减肥上的风景克里斯蒂法律考试大家凡事大家分开就是的风景三大开发了世界对方就开始的李开复三大纪律非常好哟</p></div>
+                        <div class="pub_msg"><span class="admin">上帝冉冉：<i>助 教</i></span><p>真心不错不错 讲得很好！！！非常好哟</p></div>
+                        <div class="pub_msg"><span>上帝冉冉：<i>管理员</i></span><p>真心不错不错 讲得很好！！！非常好哟</p></div>
+                        <div class="pub_msg"><span class="spadmin">上帝冉冉：<i>老 师</i></span><p>真心不错不错 讲得很好！！！非常好哟</p></div>
+                        <div class="pub_msg"><span>上帝冉冉：<i>管理员</i></span><p>真心不错不错 讲得很好！！！非常好哟</p></div>
+                        <div class="pub_msg"><span>上帝冉冉：<i>管理员</i></span><p>真心不错不错 讲得很好！！！非常好哟</p></div>
+                        <div class="pub_msg"><span>上帝冉冉：<i>管理员</i></span><p>真心不错不错 讲得很好！！！非常好哟</p></div>
+                        <div class="pub_msg"><span>上帝冉冉：<i>管理员</i></span><p>真心不错不错 讲得很好！！！非常好哟</p></div>
+                        <div class="pub_msg"><span>上帝冉冉：<i>管理员</i></span><p>真心不错不错 讲得很好！！！非常好哟</p></div>
+                        <div class="pub_msg"><span>上帝冉冉：<i>管理员</i></span><p>真心不错不错 讲得很好！！！非常好哟</p></div>
+                        </tal:block>
+                    </div>
+                </div>
+                <!-- 聊天Post请求 #mode_chat_post -->
+                <div id="mode_chat_post" class="mod_chat_post">
+                    <span class="emoticon"></span>
+                    <div id="mod_chatpost_con" class="post_con">
+                        <textarea id="chat_post_txt" placeholder="请输入文字..."></textarea>
+                        <button data-type="chat" type="button">发送</button>
+                    </div>
+                    <span class="flower"><i class="num">3</i></span>
+                </div>
+            </div>
+            
+            <!-- 问答 #question-->
+            <div id="question" class="mod_question mod_xcon hidden">
+                <!-- 提问 -->
+                <div id="question_hall" class="mod_ques_hall">
+                    <div id="question_inner_hall">
+                        <tal:block replace="">
+                        <dl id="que_1913" class="que_190952">
+                            <dt>1)</dt>
+                            <dd>
+                                <div class="q_t">
+                                    <div class="uname">
+                                        <span>
+                                            sdfsd
+                                        </span>
+                                        <em class="female">
+                                        </em>
+                                    </div>
+                                    <p>
+                                        大家分开?
+                                    </p>
+                                </div>
+                                <div class="re_list">
+                                    <div class="q_re">
+                                        <div class="uname">只听模式-老师</div>
+                                        <p>大家分开来说减肥曾经为家人看高考顺利放假了我耳机上课的感觉是福建省工商局了解俄乌克兰人问速度快个时代就发生了金额为了让三大开发就是地方大家分开来说减肥曾经为家人看高考顺利放假了我耳机上课的感觉是福建省工商局了解俄乌克兰人问速度快个时代就发生了金额为了让三大开发就是地方大家分开来说减肥曾经为家人看高考顺利放假了我耳机上课的感觉是福建省工商局了解俄乌克兰人问速度快个时代就发生了金额为了让三大开发就是地方</p>
+                                    </div>
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl id="que_1914" class="que_190952">
+                            <dt>2</dt>
+                            <dd>
+                                <div class="q_t">
+                                    <div class="uname">
+                                        <span>sdfsd</span>
+                                        <em class="female"></em>
+                                    </div>
+                                    <p>沃尔沃看人家ds</p>
+                                </div>
+                                <div class="re_list">
+                                    <div class="q_re">
+                                        <div class="uname">只听模式-老师</div>
+                                        <p>大家分开来说减肥曾经为</p>
+                                    </div>
+                                    <div class="q_re">
+                                        <div class="uname">只听模式-老师</div>
+                                        <p>大家分开来说减肥曾经为</p>
+                                    </div>
+                                    <div class="q_re">
+                                        <div class="uname">只听模式-老师</div>
+                                        <p>大家分开来说减肥曾经为</p>
+                                    </div>
+                                    <div class="q_re">
+                                        <div class="uname">只听模式-老师</div>
+                                        <p>大家分开来说减肥曾经为</p>
+                                    </div>
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl id="que_1916" class="que_189862">
+                            <dt>3.</dt>
+                            <dd>
+                                <div class="q_t">
+                                    <div class="uname">
+                                        <span>只听模式-老师</span>
+                                        <em class="female"></em>
+                                    </div>
+                                    <p>
+                                        Guangzhou HY Energy Co., LTD is a high-tech manufacturer focused on design, production and application of high performance and reliable small wind turbine products. HYE factory was established in 2001 located in northern part of Guangzhou city, factory has 150 workers, and a 10 people R&D team dedicated in higher performance and reliability of HYE wind turbine. HYE owns 35 patent designs on wind turbine blade, slip ring, rotor structure, over-speed control system etc. Each and every component of HYE wind turbine is independently designed and manufactured in house. HYE factory owns advanced wind turbine quality testing equipments and a strict quality control system, all products will go through 22 quality control processes all in HYE factory facility. All Porn..
+                                    </p>
+                                </div>
+                                <div class="re_list"></div>
+                            </dd>
+                        </dl>
+                        <dl id="que_1916" class="que_189862">
+                            <dt>3.</dt>
+                            <dd>
+                                <div class="q_t">
+                                    <div class="uname">
+                                        <span>只听模式-老师</span>
+                                        <em class="female"></em>
+                                    </div>
+                                    <p>
+                                        大家分开来说减肥曾经为家人看高考顺利放假了我耳机上课的感觉是福建省工商局了解俄乌克兰人问速度快个时代就发生了金额为了让三大开发就是地方
+                                    </p>
+                                </div>
+                                <div class="re_list"></div>
+                            </dd>
+                        </dl>
+                        <dl id="que_1916" class="que_189862">
+                            <dt>3.</dt>
+                            <dd>
+                                <div class="q_t">
+                                    <div class="uname">
+                                        <span>只听模式-老师</span>
+                                        <em class="female"></em>
+                                    </div>
+                                    <p>
+                                        大家分开来说减肥曾经为家人看高考顺利放假了我耳机上课的感觉是福建省工商局了解俄乌克兰人问速度快个时代就发生了金额为了让三大开发就是地方
+                                    </p>
+                                </div>
+                                <div class="re_list"></div>
+                            </dd>
+                        </dl>
+                        </tal:block>
+                    </div>
+                </div>
+                <!-- 提问Post -->
+                <div id="mode_question_post" class="mod_ques_post">
+                    <div class="post_con">
+                        <textarea id="ques_post_txt" placeholder="请输入文字..."></textarea>
+                        <button data-rid="0" data-type="ask" type="button">提问</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 其他盒子 #other_box-->
+            <div id="other_box" class="mod_xcon">
+                <!-- 公告 -->
+                <article class="mod_public_notify">
+                    <div class="cmd_notice">公告：<p>....</p></div>
+                </article>
+            </div>
+ 		</section>
+        
+        <!--网络选择-->
+        <section id="network" class="mod_network">
+            <div class="network_cont">
+               <!---->
+               <div class="net_top">
+                   <span>选择网络</span>
+                   <em>X</em>
+               </div>
+            <div class="net_text">95%情况下自动选择最佳线路的流畅度最好</div>
+               <div id="network_chooese" class="net_select">
+                   <ul id="select_network">
+                   </ul> 
+               </div> 
+            </div>
+        </section>
+        
+        <!--投票-->
+        <section id="vote" class="mod_vote">
+            <div id="pop_box"></div>
+        </section>
+        </tal:block>
+
+ 	</section>
+    <!-- @模版 -->
+    <section id="tpl_loader"></section>
+
+    <!-- 服务器Base目录 -->
+    <script type="text/javascript">
+        window.require = {
+            waitSeconds: 60
+        };
+    </script>
+
+    <!-- @ libs -->
+    <!-- // <script type="text/javascript" src="js/vendor/zepto.min-1.1.6.js"></script> -->
+    <script type="text/javascript" src="js/vendor/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="../cooperation/common/js/sdk.admin.js"></script>
+
+    <!-- ## SDK ## -->
+    <tal:block condition="php:!isset(_GET['js'])">
+    <!-- SDK-Mobile 正式包 -->
+    <script type="text/javascript" src="dist/sdk-mobile.min.js" charset="utf-8"></script>
+    <script data-main="js/mobile" type="text/javascript" src="dist/core.min.js"></script>
+    </tal:block>
+    <!-- 管理 -->
+    
+    <tal:block condition="php:isset(_GET['js']) && _GET['js'] == 'test'">
+    <!-- 调试版 -->
+    <!-- // <script type="text/javascript" src="js/vendor/fabric.require.js"></script> -->
+    <!-- // <script data-main="js/mobile" type="text/javascript" src="dist/core.min.js"></script> -->
+    <script type="text/javascript" src="dist/sdk-mobile.test.js" charset="utf-8"></script>
+    <script data-main="js/mobile" type="text/javascript" src="dist/core.min.js"></script>
+    </tal:block>
+
+    <!-- cnzz -->
+    <!--<tal:block metal:use-macro="../../macro/global_cnzz.html/global_cnzz"></tal:block>-->
+</body>
+</html>
+
+
+
+
+
